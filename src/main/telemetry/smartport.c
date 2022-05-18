@@ -126,6 +126,9 @@ enum
     FSSP_DATAID_CELLS_LAST = 0x030F ,
     FSSP_DATAID_HEADING    = 0x0840 ,
 // DIY range 0x5100 to 0x52FF
+    FSSP_DATAID_GYROX      = 0x5260 , // custom
+    FSSP_DATAID_GYROY      = 0x5270 , // custom
+    FSSP_DATAID_GYROZ      = 0x5280 , // custom
     FSSP_DATAID_CAP_USED   = 0x5250 ,
 #if defined(USE_ACC)
     FSSP_DATAID_PITCH      = 0x5230 , // custom
@@ -370,6 +373,11 @@ static void initSmartPortSensors(void)
     if (telemetryIsSensorEnabled(SENSOR_HEADING)) {
         ADD_SENSOR(FSSP_DATAID_HEADING);
     }
+
+    //gyro is always enables
+    ADD_SENSOR(FSSP_DATAID_GYROX);
+    ADD_SENSOR(FSSP_DATAID_GYROY);
+    ADD_SENSOR(FSSP_DATAID_GYROZ);
 
 #if defined(USE_ACC)
     if (sensors(SENSOR_ACC)) {
@@ -722,6 +730,18 @@ void processSmartPortTelemetry(smartPortPayload_t *payload, volatile bool *clear
                 *clearToSend = false;
                 break;
 #endif
+            case FSSP_DATAID_GYROX      :
+                smartPortSendPackage(id, gyroAbsRateDps(0));
+                break;
+
+            case FSSP_DATAID_GYROY      :
+                smartPortSendPackage(id, gyroAbsRateDps(1));
+                break;
+
+            case FSSP_DATAID_GYROZ      :
+                smartPortSendPackage(id, gyroAbsRateDps(2));
+                break;
+                
             case FSSP_DATAID_HEADING    :
                 smartPortSendPackage(id, attitude.values.yaw * 10); // in degrees * 100 according to SmartPort spec
                 *clearToSend = false;
